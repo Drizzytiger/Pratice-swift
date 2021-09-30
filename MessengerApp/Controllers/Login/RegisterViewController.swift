@@ -19,7 +19,7 @@ class RegisterViewController: UIViewController {
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "head")
+        imageView.image = UIImage(named: "person.circle")
         imageView.tintColor = .gray
         imageView.contentMode = .scaleAspectFit
         imageView.layer.masksToBounds = true
@@ -189,18 +189,35 @@ class RegisterViewController: UIViewController {
         }
         
         //Fire Base Login
-        FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password, completion: { authResult, error in
-            guard let result = authResult, error == nil else{
-                print("Error Creating User")
+        
+        DatabaseManager.shared.userExists(with: email, completion: { [weak self]exists in
+            guard let strongSelf = self else{
                 return
             }
-            let user = result.user
-            print("Created User: \(user)")
+            
+            guard !exists else{
+                self?.alertUserLoginError(message: "Looks like a user account for the email address already exists")
+                return
+            }
+            
+            FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password, completion: { authResult, error in
+                guard let result = authResult, error == nil else{
+                    print("Error Creating User")
+                    return
+                }
+                
+                DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName,
+                                                                    lastName: lastName,
+                                                                    emailAddress: email))
+                
+                strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+            })
+            
         })
         
     }
     
-    func alertUserLoginError(){
+    func alertUserLoginError(message: String = "Please enter all information to create a new account"){
         let alert = UIAlertController(title: "Whoops",
                                       message: "Please Enter All information to create a new account.",
                                       preferredStyle: .alert)
