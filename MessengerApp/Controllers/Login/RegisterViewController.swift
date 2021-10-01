@@ -206,9 +206,9 @@ class RegisterViewController: UIViewController {
                     return
                 }
                 
-                DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName,
-                                                                    lastName: lastName,
-                                                                    emailAddress: email))
+                DatabaseManager.shared.insertUser(with: DatabaseManager.ChatAppUser(firstname: firstName,
+                                                                                    lastname: lastName,
+                                                                                    emailAddress: email))
                 
                 strongSelf.navigationController?.dismiss(animated: true, completion: nil)
             })
